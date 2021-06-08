@@ -263,7 +263,7 @@ def GenSingleCell2CellEdge(ligandApprovedSymbolDict, receptorApprovedSymbolDict,
 
 def GenCell2CellEdges(interDB, pairListDF, ligandApprovedSymbolDict, receptorApprovedSymbolDict, coreNum, resultDir):
     pairList = [tuple(x) for x in pairListDF.values]
-    fn = os.path.join(resultDir,'LR-pairs_'+interDB)
+    fn = os.path.join(resultDir,'LR-pairs_'+interDB.split('/')[-2])
     if not os.path.exists(fn):
         os.mkdir(fn)
     
@@ -413,18 +413,18 @@ def main(species, emFile, annFile, idType, interDB, interSpecies, coreNum, outFo
     #load interaction list
     interDBExtention = interDB.split('.')[-1]
     if interDBExtention == 'csv':
-        lrL = pd.read_csv(os.path.join('lrdbs', interDB), dtype=object, index_col=None, header=0)
+        lrL = pd.read_csv(interDB, dtype=object, index_col=None, header=0)
     elif interDBExtention == 'tsv' or interDBExtention == 'txt':
-        lrL = pd.read_csv(os.path.join('lrdbs', interDB), dtype=object, index_col=None, header=0, sep='\t')
+        lrL = pd.read_csv(interDB, dtype=object, index_col=None, header=0, sep='\t')
     elif interDBExtention == 'xls' or interDBExtention == 'xlsx':
-        lrL = pd.read_excel(os.path.join('lrdbs', interDB), dtype=object, index_col=None, header=0)
+        lrL = pd.read_excel(interDB, dtype=object, index_col=None, header=0)
     else:
         sys.exit("Cannot process the ligand-receptor interaction database file, please check the format of the file, which can only be csv, tsv, txt, xls or xlsx.")
     
     if interSpecies == 'p':
-        lrE = pd.read_csv(os.path.join('lrdbs', 'lrc2p.csv'), dtype=object, index_col=None, header=0)
+        lrE = pd.read_csv('lrc2p.csv', dtype=object, index_col=None, header=0)
     elif interSpecies == 'a':
-        lrE = pd.read_csv(os.path.join('lrdbs', 'lrc2a.txt'), dtype=object, index_col=None, header=0, sep='\t')
+        lrE = pd.read_csv('lrc2a.txt', dtype=object, index_col=None, header=0, sep='\t')
     if interSpecies == 'p' or interSpecies == 'a':
         lrL = pd.concat([lrL,lrE],ignore_index=True)
         
@@ -505,14 +505,8 @@ if __name__ == '__main__':
     else:
         idType = opt.idType.lower()
     
-    #check interDB
-    stflist = glob.glob('lrdbs/%s.*' % opt.interDB)
-    if len(stflist) == 0:
-        sys.exit("Cannot find the ligand-receptor interaction database named '%s'." % opt.interDB)
-    elif len(stflist) > 1:
-        sys.exit("There are multiple ligand-receptor interaction databases with the same name '%s'." % opt.interDB)
-    else:
-        interDB = os.path.basename(stflist[0])
+    # assign to interDB
+    interDB = opt.interDB
     
     #check interSpecies
     avaInterSpecDict = {'human':'9606', 'mouse':'10090', 'expandp':'p', 'expanda':'a'}
@@ -556,3 +550,4 @@ if __name__ == '__main__':
     
     #start to construct cell-to-cell network
     main(species, opt.emFile, opt.annFile, idType, interDB, interSpecies, opt.coreNum, opt.out)
+
