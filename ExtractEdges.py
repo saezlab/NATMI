@@ -147,7 +147,7 @@ def LRExpressions(typeString, ann, cellligandDF, cellreceptorDF, countligandDF, 
     for origlabel in sorted(origlabels):
         ididx += 1
         idmapDict[origlabel] = 'Cluster %s' % ididx
-        readmeDict['colA'].append(origlabel+'/'+idmapDict[origlabel])
+        readmeDict['colA'].append(str(origlabel)+'/'+ str(idmapDict[origlabel]))
         readmeDict['colB'].append(str(len(ann.index[ann['cluster'] == origlabel])))
     readmeDF = pd.DataFrame(readmeDict)
     readmeDF.to_excel(writer, sheet_name='README', index=False, header=False)
